@@ -19,7 +19,8 @@
     ],
     "autoload": {
         "psr-0": {
-            "Algolia\\SearchApiClient": "lib/"
+            "Algolia\\SearchApiClient": "lib/",
+            "Algolia\\SearchApiClient\\Tests": "tests/"
         }
     },
     "minimum-stability": "stable"
