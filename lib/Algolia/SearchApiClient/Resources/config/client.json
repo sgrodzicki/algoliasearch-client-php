@@ -1,0 +1,407 @@
+{
+    "operations": {
+        "listIndexes": {
+            "httpMethod": "GET",
+            "uri": "indexes",
+            "summary": "List all existing indexes"
+        },
+        "deleteIndex": {
+            "httpMethod": "DELETE",
+            "uri": "indexes/{name}",
+            "summary": "Delete an index",
+            "parameters": {
+                "name": {
+                    "required": true,
+                    "description": "The name of index to delete",
+                    "location": "uri"
+                }
+            }
+        },
+        "listUserKeys": {
+            "httpMethod": "GET",
+            "uri": "keys",
+            "summary": "List all existing user keys with their associated ACLs"
+        },
+        "getUserKeyACL": {
+            "httpMethod": "GET",
+            "uri": "keys/{key}",
+            "summary": "Get ACL of a user key",
+            "parameters": {
+                "key": {
+                    "required": true,
+                    "location": "uri"
+                }
+            }
+        },
+        "deleteUserKey": {
+            "extends": "getUserKeyACL",
+            "httpMethod": "DELETE",
+            "summary": "Delete an existing user key"
+        },
+        "addUserKey": {
+            "extends": "listUserKeys",
+            "httpMethod": "POST",
+            "summary": "Create a new user key",
+            "parameters": {
+                "acl": {
+                    "type": "array",
+                    "required": true,
+                    "description": "The list of ACL for this key",
+                    "location": "json"
+                },
+                "validity": {
+                    "type": "integer",
+                    "required": false,
+                    "default": 0,
+                    "description": "The number of seconds after which the key will be automatically removed (0 means no time limit for this key)",
+                    "location": "json"
+                }
+            }
+        },
+        "addObject": {
+            "extends": "deleteIndex",
+            "httpMethod": "POST",
+            "summary": "Add an object in this index",
+            "class": "Algolia\\SearchApiClient\\Client\\Service\\Command\\ObjectCreationCommand",
+            "parameters": {
+                "content": {
+                    "type": "array",
+                    "required": true,
+                    "description": "Contains the object to add inside the index",
+                    "location": "body",
+                    "filters": [
+                        "json_encode"
+                    ]
+                },
+                "object_id": {
+                    "required": false,
+                    "description": "An object ID you want to attribute to this object (if the attribute already exist the old object will be overwrite)",
+                    "location": "uri"
+                }
+            }
+        },
+        "addObjects": {
+            "httpMethod": "POST",
+            "uri": "indexes/{name}/batch",
+            "summary": "Add several objects",
+            "parameters": {
+                "name": {
+                    "required": true,
+                    "description": "Name of the index",
+                    "location": "uri"
+                },
+                "objects": {
+                    "type": "array",
+                    "required": true,
+                    "description": "Contains an array of objects to add",
+                    "location": "json",
+                    "sentAs": "requests",
+                    "filters": [
+                        {
+                            "method": "Algolia\\SearchApiClient\\Client\\Service\\Command\\ObjectCreationCommand::splitObjects",
+                            "args": [ "@value" ]
+                        }
+                    ]
+                }
+            }
+        },
+        "getObject": {
+            "httpMethod": "GET",
+            "uri": "indexes/{name}/{id}",
+            "summary": "Get an object from this index",
+            "parameters": {
+                "name": {
+                    "required": true,
+                    "description": "Name of the index",
+                    "location": "uri"
+                },
+                "id": {
+                    "required": true,
+                    "description": "The unique identifier of the object to retrieve",
+                    "location": "uri"
+                },
+                "attributes": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Contains the list of attributes to retrieve as a comma separated string",
+                    "location": "query"
+                }
+            }
+        },
+        "partialUpdateObject": {
+            "httpMethod": "POST",
+            "uri": "indexes/{name}/{id}/partial",
+            "summary": "Update partially an object (only update attributes passed in argument)",
+            "parameters": {
+                "name": {
+                    "required": true,
+                    "description": "Name of the index",
+                    "location": "uri"
+                },
+                "id": {
+                    "required": true,
+                    "description": "Object ID",
+                    "location": "uri"
+                },
+                "object": {
+                    "required": true,
+                    "description": "Contains the object attributes to override",
+                    "location": "body",
+                    "filters": [
+                        "json_encode"
+                    ]
+                }
+            }
+        },
+        "saveObject": {
+            "extends": "getObject",
+            "httpMethod": "PUT",
+            "summary": "Override the content of object",
+            "parameters": {
+                "object": {
+                    "required": true,
+                    "description": "Contains the object to save",
+                    "location": "body",
+                    "filters": [
+                        "json_encode"
+                    ]
+                }
+            }
+        },
+        "saveObjects": {
+            "extends": "addObjects",
+            "summary": "Override the content of several objects"
+        },
+        "deleteObject": {
+            "extends": "getObject",
+            "httpMethod": "DELETE",
+            "summary": "Delete an object from the index"
+        },
+        "search": {
+            "extends": "deleteIndex",
+            "httpMethod": "GET",
+            "summary": "Search inside the index",
+            "parameters": {
+                "query": {
+                    "required": true,
+                    "description": "The full text query",
+                    "location": "query"
+                },
+                "attributes": {
+                    "type": "string",
+                    "required": false,
+                    "description": "A comma separated string that contains attribute names to retrieve",
+                    "location": "query"
+                },
+                "attributesToHighlight": {
+                    "type": "string",
+                    "required": false,
+                    "description": "A string that contains attribute names to highlight separated by a comma",
+                    "location": "query"
+                },
+                "attributesToSnippet": {
+                    "type": "string",
+                    "required": false,
+                    "description": "A string that contains the names of attributes to snippet alongside the number of words to return",
+                    "location": "query"
+                },
+                "minWordSizeForApprox1": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "The minimum number of characters in a query word to accept one typo in this word",
+                    "location": "query"
+                },
+                "minWordSizeForApprox2": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "The minimum number of characters in a query word to accept two typos in this word",
+                    "location": "query"
+                },
+                "getRankingInfo": {
+                    "type": "boolean",
+                    "required": false,
+                    "description": "If set to 1, the result hits will contain ranking information in _rankingInfo attribute",
+                    "location": "query"
+                },
+                "page": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "Page to retrieve (zero base)",
+                    "location": "query"
+                },
+                "hitsPerPage": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "Number of hits per page",
+                    "location": "query"
+                },
+                "aroundLatLng": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Let you search for entries around a given latitude/longitude",
+                    "location": "query"
+                },
+                "insideBoundingBox": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Let you search entries inside a given area defined by the two extreme points of a rectangle",
+                    "location": "query"
+                },
+                "queryType": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Select how the query words are interpreted",
+                    "location": "query"
+                },
+                "tags": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Filter the query by a set of tags",
+                    "location": "query"
+                }
+            }
+        },
+        "getTask": {
+            "httpMethod": "GET",
+            "uri": "indexes/{name}/task/{id}",
+            "parameters": {
+                "name": {
+                    "required": true,
+                    "description": "Name of the index",
+                    "location": "uri"
+                },
+                "id": {
+                    "type": "integer",
+                    "required": true,
+                    "description": "The ID of the task returned by server",
+                    "location": "uri"
+                }
+            }
+        },
+        "getSettings": {
+            "httpMethod": "GET",
+            "uri": "indexes/{name}/settings",
+            "parameters": {
+                "name": {
+                    "required": true,
+                    "description": "Name of the index",
+                    "location": "uri"
+                }
+            }
+        },
+        "setSettings": {
+            "extends": "getSettings",
+            "httpMethod": "PUT",
+            "parameters": {
+                "minWordSizeForApprox1": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "The minimum number of characters in a query word to accept one typo in this word",
+                    "location": "json"
+                },
+                "minWordSizeForApprox2": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "The minimum number of characters in a query word to accept two typos in this word",
+                    "location": "json"
+                },
+                "hitsPerPage": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "Number of hits per page",
+                    "location": "json"
+                },
+                "attributesToRetrieve": {
+                    "type": "array",
+                    "required": false,
+                    "description": "Default list of attributes to retrieve for objects",
+                    "location": "json"
+                },
+                "attributesToHighlight": {
+                    "type": "array",
+                    "required": false,
+                    "description": "Default list of attributes to highlight",
+                    "location": "json"
+                },
+                "attributesToSnippet": {
+                    "type": "array",
+                    "required": false,
+                    "description": "A string that contains the names of attributes to snippet alongside the number of words to return",
+                    "location": "json"
+                },
+                "attributesToIndex": {
+                    "type": "array",
+                    "required": false,
+                    "description": "The list of fields you want to index",
+                    "location": "json"
+                },
+                "ranking": {
+                    "type": "array",
+                    "required": false,
+                    "description": "Controls the way results are sorted",
+                    "location": "json"
+                },
+                "queryType": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Select how the query words are interpreted",
+                    "location": "json"
+                },
+                "customRanking": {
+                    "type": "array",
+                    "required": false,
+                    "description": "Lets you specify part of the ranking",
+                    "location": "json"
+                }
+            }
+        },
+        "listIndexUserKeys": {
+            "httpMethod": "GET",
+            "uri": "indexes/{name}/keys",
+            "summary": "List all existing user keys associated to this index with their associated ACLs",
+            "parameters": {
+                "name": {
+                    "required": true,
+                    "description": "Name of the index",
+                    "location": "uri"
+                }
+            }
+        },
+        "getIndexUserKeyACL": {
+            "extends": "listIndexUserKeys",
+            "uri": "indexes/{name}/keys/{key}",
+            "summary": "Get ACL of a user key associated to this index",
+            "parameters": {
+                "key": {
+                    "required": true,
+                    "location": "uri"
+                }
+            }
+        },
+        "deleteIndexUserKey": {
+            "extends": "getIndexUserKeyACL",
+            "httpMethod": "DELETE",
+            "summary": "Delete an existing user key associated to this index"
+        },
+        "addIndexUserKey": {
+            "extends": "listIndexUserKeys",
+            "httpMethod": "POST",
+            "summary": "Create a new user key associated to this index",
+            "parameters": {
+                "acl": {
+                    "type": "array",
+                    "required": true,
+                    "description": "The list of ACL for this key",
+                    "location": "json"
+                },
+                "validity": {
+                    "type": "integer",
+                    "required": false,
+                    "default": 0,
+                    "description": "The number of seconds after which the key will be automatically removed (0 means no time limit for this key)",
+                    "location": "json"
+                }
+            }
+        }
+    }
+}

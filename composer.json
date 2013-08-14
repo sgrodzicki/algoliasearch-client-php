@@ -1,6 +1,9 @@
 {
     "name": "sgrodzicki/algoliasearch-api-client",
     "description": "Algolia Search API Client for PHP",
+    "homepage": "https://github.com/sgrodzicki/algoliasearch-client-php",
+    "type": "library",
+    "keywords": ["algolia", "search", "api"],
     "require": {
         "guzzle/guzzle": "3.7.*"
     },
@@ -14,5 +17,10 @@
             "email": "sebastian@grodzicki.pl"
         }
     ],
+    "autoload": {
+        "psr-0": {
+            "Algolia\\SearchApiClient": "lib/"
+        }
+    },
     "minimum-stability": "stable"
 }
